@@ -3,8 +3,8 @@ Progetto finale per il corso di Visualizzazione delle Informazioni dell'A.A. 202
 
 ## La storia
   
-La (saga Hrafnkels)[https://en.wikipedia.org/wiki/Hrafnkels_saga] è una delle saghe islandesi che racconta delle avventure dei capitani e dei contadini nell'est dell'Islanda nel decimo secolo.  
-La (rete)[dataset/hrafnkel_saga_network.xlsx] della Saga Hrafnkel descrive le relazioni tra i protagonisti della saga.  
+La [saga Hrafnkels](https://en.wikipedia.org/wiki/Hrafnkels_saga) è una delle saghe islandesi che racconta delle avventure dei capitani e dei contadini nell'est dell'Islanda nel decimo secolo.  
+La [rete](dataset/hrafnkel_saga_network.xlsx) della Saga Hrafnkel descrive le relazioni tra i protagonisti della saga.  
   
 Il foglio di calcolo "hrafnkel_nodes" contiene i personaggi:
 - id: l'id del personaggio;  
