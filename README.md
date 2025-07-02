@@ -3,7 +3,10 @@ Progetto finale per il corso di Visualizzazione delle Informazioni dell'A.A. 202
 
 ## La storia
   
-La [saga Hrafnkels](https://en.wikipedia.org/wiki/Hrafnkels_saga) è una delle saghe islandesi che racconta delle avventure dei capitani e dei contadini nell'est dell'Islanda nel decimo secolo.  
+La [saga Hrafnkels](https://en.wikipedia.org/wiki/Hrafnkels_saga) è una delle saghe islandesi più brevi e celebri, ambientata nel X secolo.  
+Racconta la storia di Hrafnkell Freysgoði, un potente capo e devoto del dio Freyr, noto per il suo cavallo sacro Freyfaxi.  
+La vicenda ruota attorno al conflitto tra Hrafnkell e un giovane servo che viola un giuramento sacro, scatenando una catena di vendette, sconfitte e rivincite.  
+La saga esplora temi come l'onore, la giustizia e il cambiamento del destino, con uno stile sobrio e diretto, tipico delle saghe islandesi.  
 
 ## Il dataset
 La [rete](dataset/hrafnkel_saga_network.xlsx) della Saga Hrafnkel descrive le relazioni tra i protagonisti della saga.  
