@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/style.css">
+  <title>The Hrafnkels Saga</title>
+  <script src="lib/d3.min.js"></script>
+  <script src="js/saga.js"></script>
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+</head>
+
+
+<body id="body">
+
+  <div style="height: 10px;"></div>
+  <h1 class="italic-title" style="text-align: center;">The Hrafnkels Saga</h1>
+
+  <div id="descriptionDiv">
+          <p id="description">La saga di Hrafnkel è una delle saghe islandesi che racconta le avventure di capitani e contadini 
+            nell’Islanda orientale del X secolo. La rete della Saga di Hrafnkel descrive le relazioni tra i protagonisti della 
+            saga attraverso un grafo non orientato. Ogni nodo rappresenta un personaggio della saga, mentre gli archi rappresentano 
+            le azioni che essi compiono in ciascun capitolo della narrazione. Utilizzando il cursore qui sotto è possibile scorrere 
+            tra i vari capitoli.</p>
+  </div>
+
+  <div style="text-align: center;">
+    <p class="intro">
+      Questo tool permette di disegnare un grafo per comprendere meglio quali siano i legami fra i personaggi della saga islandese "Hrafnkels".
+    </p>
+    <p class="intro">
+      Per iniziare carica i dati e disegna il relativo grafo con gli appositi pulsanti.
+    </p>
+    <p class="intro">
+      Puoi decidere se disegnare i personaggi dell'intera saga o quelli di uno specifico capitolo.
+    </p>
+    <p class="main hidden">
+      È possibile mantenere il cursore su di un nodo per alcuni secondi in modo da ottenere informazioni su quel personaggio e transitare su di un link per comprendere quale sia il legame fra i personaggi.
+    </p>
+    <p class="main hidden">
+      Il click di un nodo provoca la creazione di un albero genealogico del personaggio nel riquadro affianco.
+    </p>
+  </div>
+
+  <div style="height: 10px;"></div>
+  <table class="center">
+  <tr>
+    <td>
+      <button id="drawButton" class="saga-button" onClick="draw()" disabled>Draw</button>
+    </td>
+    <td>
+    <span id="check-span">
+      <label>Storia fino al capitolo: </label>
+      <input type="checkbox" id="myCheckbox">
+        <a href="#" class="tooltip" data-tooltip="Vengono visualizzati tutti i nodi e i link presenti fino al capitolo scelto. I nodi appartenenti a quest'ultimo sono rappresentati in modo da essere ben visibili."><img src="images/question_mark.png" alt="Punto interrogativo" width="12" height="12"></a>
+    </span>
+    </td>
+    <td>
+      <select id="chapter-select" class="hidden">
+          <option value="1">Chapter 1</option>
+          <option value="2">Chapter 2</option>
+          <option value="3">Chapter 3</option>
+          <option value="4">Chapter 4</option>
+          <option value="5">Chapter 5</option>
+          <option value="6">Chapter 6</option>
+          <option value="7">Chapter 7</option>
+          <option value="8">Chapter 8</option>
+          <option value="9">Chapter 9</option>
+          <option value="10">Chapter 10</option>
+          <option value="11">Chapter 11</option>
+          <option value="12">Chapter 12</option>
+          <option value="13">Chapter 13</option>
+          <option value="14">Chapter 14</option>
+          <option value="15">Chapter 15</option>
+          <option value="16">Chapter 16</option>
+      </select>
+    </td>
+  </tr>
+  </table>
+
+  <div style="height: 15px;"></div>
+  <p id="lista"></p>
+
+  <div style="text-align: center;">
+    <svg id="graphSVG" style="border-style: solid;"></svg>
+    <svg id="treeSVG" style="border-style: solid;" class="hidden"></svg>
+    <div id="link-info" style="font-size: 25px; visibility:hidden">VUOTO</div>
+  </div>
+
+  <div style="height: 100;"></div>
+
+</body>
+</html>
