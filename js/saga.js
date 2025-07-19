@@ -5,10 +5,8 @@ var node;
 var link;
 var nodi = [];
 var links =[];
-var width = 900;
-var height = 600;
-var color = d3.scale.category10();
-
+var width = 800;
+var height = 500;
 
 
 /* Funzione che legge i dati contenuti nel file JSON */
@@ -23,32 +21,39 @@ function leggiJSON() {
 
       document.getElementById("drawButton").disabled = false;
       document.getElementById("loadFileFromClient").disabled = true;
-      //document.getElementById("updateButton").disabled = false;
-      //document.getElementById("check-span").classList.remove('hidden');
     })
     .catch(error => {
       console.log('Si è verificato un errore:', error);
     });
 }
 
+
 /* Funzione che carica in automatico i dati al caricamento della pagina */
 window.onload = function() {
   leggiJSON();
 };
 
-window.addEventListener('DOMContentLoaded', function() {
-  const chapterSelect = document.getElementById("chapter-select");
-  const checkbox = document.getElementById("myCheckbox");
 
-  checkbox.addEventListener('change', function() {
+/* Funzione che gestisce lo slider */
+window.addEventListener('DOMContentLoaded', function() {
+  const checkbox = document.getElementById("myCheckbox");
+  const sliderContainer = document.getElementById("slider-container");
+  const slider = document.getElementById("chapter-slider");
+  const valueLabel = document.getElementById("chapter-value");
+
+  checkbox.addEventListener('change', function () {
     if (checkbox.checked) {
-      chapterSelect.classList.remove('hidden');
+      sliderContainer.classList.remove('hidden');
     } else {
-      chapterSelect.classList.add('hidden');
+      sliderContainer.classList.add('hidden');
     }
   });
-});
 
+  // Aggiorna il valore del capitolo mostrato
+  slider.addEventListener('input', function () {
+    valueLabel.textContent = "Capitolo " + slider.value;
+  });
+});
 
 
 /* Funzione per trovare la componente connessa al nodo selezionato */
@@ -88,7 +93,7 @@ function isNodeInComponent(node, component) {
 }
 
 
-/* Funzione che disegna i nodi del grafo gerarchico nel SVG */
+/* Funzione che disegna i nodi del grafo nel SVG */
 function drawNodes(svg, data, selectedNodeId) {
   const spanY = 100;
 
@@ -114,10 +119,14 @@ function drawNodes(svg, data, selectedNodeId) {
     .append("circle")
     .attr("class", "node")
     .attr("r", function (d) {
-      return d.id === selectedNodeId ? 8 : 5;
+      return d.id === selectedNodeId ? 12 : 10;
     })
     .attr("id", d => d.id)
-    .style("fill", d => color(d.gender))
+    .style("fill", d => {
+      if (d.gender === 1) return "#214b9fff";   // per i maschi
+      if (d.gender === 0) return "#990f0fff";   // per le femmine
+        return "#0e770eff";                     // per i neutri/mancanti
+    })
     .attr("cx", (d, i) => i * 50 + 50)
     .attr("cy", spanY / 2);
 
@@ -134,7 +143,7 @@ function drawNodes(svg, data, selectedNodeId) {
 }
 
 
-/* Funzione che disegna gli archi del grafo gerarchico nel SVG */
+/* Funzione che disegna gli archi del grafo nel SVG */
 function drawEdges(svg, filteredLinks) {
   filteredLinks.forEach(function(l) {
     var x1 = parseInt(document.getElementById(l.source.id).getAttribute('cx')) + 40;
@@ -152,11 +161,14 @@ function drawEdges(svg, filteredLinks) {
       .attr('y2', y2)
       .attr('etichetta', l.source.label + " " + readAction(l.action) + " " + l.target.label)
       .style("stroke-width", 3)
-      .style("stroke", "#828282");
+      .style("stroke", function(d) {
+        return getColorByAction(d.action);
+      });
   });
 
   d3.selectAll("line").attr("order", -1);
 }
+
 
 /* Funzione che restituisce la descrizione testuale */
 function readAction(nAction){
@@ -166,146 +178,133 @@ function readAction(nAction){
 }
 
 
-/* Funzione che crea l'albero gerarchico a partire da un nodo selezionato */
-function createTree(filteredNodes, filteredLinks, selectedNodeId) {
-  allNodes = [];
-  spanY = 100;
-  levelLinks = [];
-  svg = d3.select("#treeSVG");
-  
-  descents = filteredLinks.filter(function(l) {
-    return parseInt(l.action) == 1;
-  });
-  
-  pairs = filteredLinks.filter(function(l) {
-    return parseInt(l.action) == 2;
-  });
-
-  while (filteredNodes.length != 0) {
-    let levelNodes = [];
-    for (let i = 0; i < filteredNodes.length; i++) {
-      let flag = true;
-      for (let j = 0; j < descents.length; j++) {
-        if (descents[j].source == filteredNodes[i]) {
-          flag = false;
-          break;
-        }  
-      }
-      if (flag == true) {
-        levelNodes.push(filteredNodes[i]);
-        filteredNodes.splice(i, 1);
-        i--;
-      }
-    }
-    
-    for (let i = 0; i < levelNodes.length; i++) {
-      var risultato = true;
-      for (let j = 0; j < pairs.length; j++) {
-        if (pairs[j].source == levelNodes[i]) {
-          risultato = levelNodes.includes(pairs[j].target);
-          break;
-        } else if (pairs[j].target == levelNodes[i]) {
-          risultato = levelNodes.includes(pairs[j].source);
-          break;
-        }
-      }
-      if (risultato == false) {
-        filteredNodes.push(levelNodes[i]);
-        levelNodes.splice(i, 1);
-        i--;
-      }
-    }
-    
-    allNodes.push(levelNodes);
-    levelLinks = [];
-    
-    for (let i = 0; i < descents.length; i++) {
-      for (let j = 0; j < levelNodes.length; j++) {
-        if (descents[i].target == levelNodes[j]) {
-          levelLinks.push(descents[i]);
-          descents.splice(i, 1);
-          i--;
-          break;
-        }
-      }
-    }
-  }
-  drawNodes(svg, allNodes, selectedNodeId);
-  drawEdges(svg, filteredLinks);
-  showNode();
-  showLinkForTree();
-}
-
-
-/* Funzione che aggiunge la descrizione testuale agli archi del grafo */
-function showLink() {
+/* Funzione che mostra un popup informativo quando l’utente passa il mouse su un  link */
+function showLinkPopup() {
   d3.selectAll(".link")
     .on("mouseover", function(d) {
-      var actionCodesObject = window.action_codes[d.action];
-      var actionDescription = actionCodesObject['action description'];
-      d3.select("#link-info")
-        .text(d.source.label + " " + actionDescription + " " + d.target.label)
-        .style("visibility", "visible")
-        .style("font-size", "25px");
-    })
-    .on("mouseout", function() {
-      d3.select("#link-info").style("visibility", "hidden");
-    });
-}
+      // Rimuove eventuali popup esistenti
+      d3.select(".popup").remove();
 
+      // Ottiene coordinate del mouse
+      var mouseX = d3.event.pageX;
+      var mouseY = d3.event.pageY;
 
-/* Funzione che aggiunge la descrizione testuale agli archi dell'albero */
-function showLinkForTree() {
-  var lines = d3.selectAll("svg#treeSVG line");
-  var linesOfInterest = lines[0];
-  d3.selectAll(linesOfInterest)
-    .on("mouseover", function(d) {
-      var etichetta = d3.select(this).attr('etichetta');
-      d3.select("#link-info")
-        .text(etichetta)
-        .style("visibility", "visible")
-        .style("font-size", "25px");
-    })
-    .on("mouseout", function() {
-      d3.select("#link-info").style("visibility", "hidden");
-    });
-}
+      // Ottiene la descrizione dell’azione
+      var actionDescription = readAction(d.action);
 
-
-/* Funzione che mostra un popup informativo quando l’utente passa il mouse su un nodo */
-function showNode() {
-  d3.selectAll(".node")
-    .on("mouseover", function(d) {
+      // Crea il popup
       var popup = d3.select("body")
         .append("div")
         .attr("class", "popup")
-        .style("left", d3.event.pageX + "px")
-        .style("top", d3.event.pageY + "px");
+        .style("position", "absolute")
+        .style("left", (mouseX + 10) + "px")
+        .style("top", (mouseY + 10) + "px")
+        .style("background-color", "rgba(255,255,255,0.95)")
+        .style("padding", "8px")
+        .style("border", "1px solid #ccc")
+        .style("border-radius", "5px")
+        .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)");
 
-      popup.append("h2")
-        .text(d.label + "[" + d.id + "]");
-
-      if (d.chapter !== undefined) {
-        popup.append("p")
-          .text("Chapter: " + d.chapter);
-      }
-
-      var genderCodesObject = window.gender_codes[d.gender];
-      var genderDescription = genderCodesObject['gender description'];
-
-      if (d.gender !== undefined) {
-        popup.append("p")
-          .text("Gender: " + genderDescription);
-      }
+      popup.append("p").text(d.source.label + " " + actionDescription + " " + d.target.label);
     })
-    .on("mouseout", function(d) {
+    .on("mouseout", function() {
       d3.select(".popup").remove();
     });
 }
 
 
+/* Funzione che mostra un popup informativo quando l’utente passa il mouse su un nodo 
+   Inoltre evidenzia solo i link e nodi connessi al nodo su cui si passa il mouse */
+function showNode() {
+  d3.selectAll(".node")
+    .on("mouseover", function(d) {
+      // Evidenzia nodi e link connessi
+      d3.selectAll(".node")
+        .style("opacity", function(o) {
+          return isConnected(d, o) ? 1 : 0.1;
+        });
+
+      d3.selectAll(".link")
+        .style("opacity", function(o) {
+          return (o.source.id === d.id || o.target.id === d.id) ? 1 : 0.05;
+        });
+
+      // Crea il popup
+      var mouseX = d3.event.pageX;
+      var mouseY = d3.event.pageY;
+
+      var popup = d3.select("body")
+        .append("div")
+        .attr("class", "popup")
+        .style("position", "absolute")
+        .style("left", (mouseX + 10) + "px")
+        .style("top", (mouseY + 10) + "px")
+        .style("background-color", "rgba(255,255,255,0.95)")
+        .style("padding", "8px")
+        .style("border", "1px solid #ccc")
+        .style("border-radius", "5px")
+        .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)");
+
+      popup.append("h2")
+        .text(d.label + " [" + d.id + "]");
+
+      if (d.chapter !== undefined) {
+        popup.append("p").text("Chapter: " + d.chapter);
+      }
+
+      if (d.page !== undefined) {
+        popup.append("p").text("Page: " + d.page);
+      }
+
+      var genderCodesObject = window.gender_codes[d.gender];
+      var genderDescription = genderCodesObject ? genderCodesObject['gender description'] : "N/A";
+      var genderSymbol = d.gender === 1 ? "\u2642" : (d.gender === 0 ? "\u2640" : "\u26A7");
+
+      popup.append("p").text("Gender: " + genderDescription + " " + genderSymbol);
+    })
+    .on("mouseout", function(d) {
+      d3.select(".popup").remove();
+
+      // Ripristina opacità normale
+      d3.selectAll(".node").style("opacity", 1);
+      d3.selectAll(".link").style("opacity", 1);
+    });
+}
+
+
+/* Funzione di ausilio per capire se due nodi sono connessi tra loro */
+function isConnected(a, b) {
+  return window.links.some(function(l) {
+    return (l.source.id === a.id && l.target.id === b.id) ||
+           (l.source.id === b.id && l.target.id === a.id);
+  }) || a.id === b.id;
+}
+
+
+/* Funzione che restituisce il colore degli archi in base al tipo di relazione che unisce i due nodi */
+function getColorByAction(action) {
+  const code = window.action_codes[action];
+  if (!code) return "#ff00d0d1"; // fallback se l'action non esiste
+
+  if (code.isFamily === 1) {
+    return "#d2bc3cff"; // parentela
+  }
+
+  switch (parseInt(code.hostilityLevel)) {
+    case 0: return "#6a6565ff"; // neutra o cooperativa
+    case 1: return "#366e38ff"; // lievemente positiva / neutra
+    case 2: return "#6b1515ff"; // ostile
+    case 3: return "#2c0101ff"; // molto ostile
+    default: return "#ff00d0d1"; // fallback
+  }
+}
+
+
 /* Funzione per visualizzare il grafo */
 function draw() {
+  document.getElementById("check-span").classList.remove("hidden"); 
+  document.getElementById("legendContainer").classList.remove("hidden"); 
+  document.getElementById("graph-container").classList.remove("hidden");
   // Parametri del layout force-directed
   var charge = -120;
   var linkDistance = 120;
@@ -316,7 +315,7 @@ function draw() {
   var alpha = 0.1;
   var chargeDistance = 1000;
 
-  var chapterSelect = document.getElementById("chapter-select");
+  var chapterSlider = document.getElementById("chapter-slider");
   showNodeOK = false;
 
   // Inizializzazione del layout force-directed di D3
@@ -355,10 +354,6 @@ function draw() {
     // Mostra l'interfaccia principale, nasconde l'intro
     d3.selectAll(".intro").classed("hidden", true);
     d3.selectAll(".main").classed("hidden", false);
-    d3.select("#treeSVG")
-      .classed("hidden", false)
-      .attr("width", 300)
-      .attr("height", 600);
   }
 
   primaVolta = false;
@@ -369,21 +364,24 @@ function draw() {
 
     // Filtra i nodi per capitolo selezionato
     for (var i = 0; i < nodi.length; i++) {
-      var appartenenza = nodi[i].chapter <= parseInt(chapterSelect.value);
+      var appartenenza = nodi[i].chapter <= parseInt(chapterSlider.value);
       if (appartenenza) nodiCapitolo.push(nodi[i].id);
     }
 
     // Disegna solo i link i cui nodi estremi sono inclusi nei nodi filtrati
     link = svg.selectAll(".link")
       .data(links)
-      .enter().append("line")
+      .enter().append("path")
       .filter(function(d) {
         return nodiCapitolo.includes(d.source.id) &&
-               nodiCapitolo.includes(d.target.id);
+              nodiCapitolo.includes(d.target.id);
       })
       .attr("class", "link")
-      .style("stroke-width", 4)
-      .style("stroke", "#828282");
+      .attr("fill", "none")
+      .attr("stroke-width", 4)
+      .attr("stroke", function(d) {
+        return getColorByAction(d.action);
+      });
 
     // Disegna i nodi filtrati
     node = svg.selectAll(".node")
@@ -394,55 +392,40 @@ function draw() {
       })
       .attr("class", "node")
       .attr("r", function(d) {
-        return (d.chapter === parseInt(chapterSelect.value)) ? 8 : 5;
+        return (d.chapter === parseInt(chapterSlider.value)) ? 12 : 10;
       })
-      .style("fill", function(d) {
-        return color(d.gender);
+      .style("fill", d => {
+        if (d.gender === 1) return "#214b9fff";     // blu
+        if (d.gender === 0) return "#990f0fff";   // rosso
+          return "#0e770eff";                              // verde per neutro o mancante
       })
       .call(force.drag);
   } else {
+    
     // Disegna il grafo completo (nessun filtro per capitolo)
     link = svg.selectAll(".link")
       .data(links)
-      .enter().append("line")
+      .enter().append("path")
       .attr("class", "link")
-      .style("stroke-width", 3)
-      .style("stroke", "#828282");
+      .attr("fill", "none")
+      .attr("stroke-width", 3)
+      .attr("stroke", function(d) {
+        return getColorByAction(d.action);
+      });
+
 
     node = svg.selectAll(".node")
       .data(nodi)
       .enter().append("circle")
       .attr("class", "node")
-      .attr("r", 5)
-      .style("fill", function(d) {
-        return color(d.gender);
+      .attr("r", 10)
+      .style("fill", d => {
+        if (d.gender === 1) return "#214b9fff";     // blu
+        if (d.gender === 0) return "#990f0fff";   // rosso
+          return "#0e770eff";                              // verde per neutro o mancante
       })
       .call(force.drag);
   }
-
-  // Gestione click su un nodo: mostra l'albero genealogico del componente connesso
-  d3.selectAll(".node").on("click", function(clickedNode) {
-    d3.select(".popup").remove();
-    d3.select("#treeSVG").selectAll("*").remove();
-
-    var selectedNodeId = clickedNode.id;
-    var selectedComponent = findConnectedComponent(selectedNodeId);
-
-    // Filtra i link della componente connessa (azione <= 2)
-    var filteredLinks = links.filter(function(d) {
-      return isNodeInComponent(d.source, selectedComponent) &&
-             isNodeInComponent(d.target, selectedComponent) &&
-             parseInt(d.action) <= 2;
-    });
-
-    // Filtra i nodi della componente connessa
-    var filteredNodes = nodi.filter(function(d) {
-      return isNodeInComponent(d, selectedComponent);
-    });
-
-    // Costruisce l'albero genealogico relativo al nodo selezionato
-    createTree(filteredNodes, filteredLinks, selectedNodeId);
-  });
 
   // Avvia il layout force-directed
   force.nodes(nodi)
@@ -451,10 +434,16 @@ function draw() {
 
   // Aggiorna posizioni dei nodi e dei link a ogni "tick"
   force.on("tick", function() {
-    link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+    link.attr("d", function(d) {
+      const x1 = d.source.x;
+      const y1 = d.source.y;
+      const x2 = d.target.x;
+      const y2 = d.target.y;
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dr = Math.sqrt(dx * dx + dy * dy) * 1.5; // raggio per curva
+      return `M${x1},${y1} A${dr},${dr} 0 0,1 ${x2},${y2}`;
+      });
 
     node.attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
@@ -463,17 +452,17 @@ function draw() {
   // Dopo un breve delay, abilita tooltip e info su nodi e link
   setTimeout(function() {
     showNode();
-    showLink();
+    showLinkPopup();
   }, 2500);
 }
 
  
+/* Funzione che al caricamento della pagina disattiva tutte le funzioni attivate */
 window.addEventListener("beforeunload", function(event) {
   document.getElementById("drawButton").disabled = true;
-  document.getElementById("updateButton").disabled = true;
   document.getElementById("myCheckbox").checked = false;
   document.getElementById("check-span").classList.add('hidden');
-  document.getElementById("treeSVG").classList.add('hidden');
   document.getElementsByClassName("intro").classList.remove('hidden');
   document.getElementsByClassName("main").classList.add('hidden');
 });
+
