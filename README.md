@@ -24,8 +24,8 @@ Il foglio di calcolo "hrafnkel_edges" contiene le interazioni tra i personaggi:
 - page: la pagina in cui l'azione è descritta.
 
 ### Demo:
-![Frontend](demo/frontend.png)
-[Guarda la demo del progetto con il grafo completo](demo/grafo_completo.gif)
+![Frontend](demo/frontend.png)  
+[Guarda la demo del progetto con il grafo completo](demo/grafo_completo.gif)  
 [Guarda la demo del progetto con il grafo filtrato per capitoli](demo/grafo_completo.gif)
 
 ## Autore
