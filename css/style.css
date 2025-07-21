@@ -56,6 +56,7 @@ html, body {
     opacity: 0.9;
     font-family: 'MedievalSharp', Georgia, serif;
   }
+
   .container {
     display: grid;
     grid-template-columns: repeat(2, 1fr); 
@@ -184,14 +185,7 @@ html, body {
     padding: 1em 2em;
   }
 
-  #graphSVG, #treeSVG {
-    background-color: rgba(242, 207, 161, 0.6); 
-    border: 3px solid #af7f53;
-    border-radius: 10px;
-    margin-bottom: 30px;
-  }
-
-  #menu {
+    #menu {
     max-width: 600px;       
     margin: 0px auto;     
     padding: 15px 40px;   
@@ -200,4 +194,11 @@ html, body {
     font-weight: 600;     
     line-height: 1.5;     
     text-align: center;  
+  }
+
+  #graphSVG, #treeSVG {
+    background-color: rgba(242, 207, 161, 0.6); 
+    border: 3px solid #af7f53;
+    border-radius: 10px;
+    margin-bottom: 30px;
   }

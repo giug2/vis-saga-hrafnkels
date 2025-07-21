@@ -1,10 +1,6 @@
 var primaVolta=true;
-var svg = null;
-var force = null;
 var node;
 var link;
-var nodi = [];
-var links =[];
 var width = 800;
 var height = 500;
 
@@ -90,83 +86,6 @@ function findConnectedComponent(selectedNodeId) {
 /* Funzione per verificare se un nodo appartiene a una componente specifica */
 function isNodeInComponent(node, component) {
   return component.has(node.id);
-}
-
-
-/* Funzione che disegna i nodi del grafo nel SVG */
-function drawNodes(svg, data, selectedNodeId) {
-  const spanY = 100;
-
-  // Crea un gruppo separato per i link 
-  const linksGroup = svg.append("g")
-    .attr("id", "linksGroup");
-
-  // Crea un gruppo <g> per ciascun array di nodi nel dataset
-  const groups = svg.selectAll("g")
-    .filter(function () {
-      return this.getAttribute("id") !== "linksGroup";
-    })
-    .data(data)
-    .enter()
-    .append("g")
-    .attr("transform", (d, i) => `translate(40, ${i * spanY})`)
-    .attr("y", (d, i) => i * spanY);
-
-  // Aggiunge i cerchi dei nodi all'interno di ciascun gruppo
-  const nodes = groups.selectAll("circle")
-    .data(d => d)
-    .enter()
-    .append("circle")
-    .attr("class", "node")
-    .attr("r", function (d) {
-      return d.id === selectedNodeId ? 12 : 10;
-    })
-    .attr("id", d => d.id)
-    .style("fill", d => {
-      if (d.gender === 1) return "#214b9fff";   // per i maschi
-      if (d.gender === 0) return "#990f0fff";   // per le femmine
-        return "#0e770eff";                     // per i neutri/mancanti
-    })
-    .attr("cx", (d, i) => i * 50 + 50)
-    .attr("cy", spanY / 2);
-
-  // Calcola la posizione assoluta dei nodi e la memorizza in d.tx / d.ty
-  data.flat().forEach((d) => {
-    const nodeEl = document.getElementById(d.id);
-    const parentY = parseInt(nodeEl.parentNode.getAttribute('y'));
-    const cy = parseInt(nodeEl.getAttribute('cy'));
-    const cx = parseInt(nodeEl.getAttribute('cx'));
-
-    d.tx = cx;
-    d.ty = cy + parentY;
-  });
-}
-
-
-/* Funzione che disegna gli archi del grafo nel SVG */
-function drawEdges(svg, filteredLinks) {
-  filteredLinks.forEach(function(l) {
-    var x1 = parseInt(document.getElementById(l.source.id).getAttribute('cx')) + 40;
-    var y1 = parseInt(document.getElementById(l.source.id).getAttribute('cy')) +
-             parseInt(document.getElementById(l.source.id).parentNode.getAttribute('y'));
-    var x2 = parseInt(document.getElementById(l.target.id).getAttribute('cx')) + 40;
-    var y2 = parseInt(document.getElementById(l.target.id).getAttribute('cy')) +
-             parseInt(document.getElementById(l.target.id).parentNode.getAttribute('y'));
-
-    svg.select("#linksGroup")
-      .append('line')
-      .attr('x1', x1)
-      .attr('y1', y1)
-      .attr('x2', x2)
-      .attr('y2', y2)
-      .attr('etichetta', l.source.label + " " + readAction(l.action) + " " + l.target.label)
-      .style("stroke-width", 3)
-      .style("stroke", function(d) {
-        return getColorByAction(d.action);
-      });
-  });
-
-  d3.selectAll("line").attr("order", -1);
 }
 
 
@@ -316,7 +235,6 @@ function draw() {
   var chargeDistance = 1000;
 
   var chapterSlider = document.getElementById("chapter-slider");
-  showNodeOK = false;
 
   // Inizializzazione del layout force-directed di D3
   force = d3.layout.force()
@@ -350,10 +268,6 @@ function draw() {
       link.source = link.source - 1;
       link.target = link.target - 1;
     });
-
-    // Mostra l'interfaccia principale, nasconde l'intro
-    d3.selectAll(".intro").classed("hidden", true);
-    d3.selectAll(".main").classed("hidden", false);
   }
 
   primaVolta = false;
@@ -462,7 +376,5 @@ window.addEventListener("beforeunload", function(event) {
   document.getElementById("drawButton").disabled = true;
   document.getElementById("myCheckbox").checked = false;
   document.getElementById("check-span").classList.add('hidden');
-  document.getElementsByClassName("intro").classList.remove('hidden');
-  document.getElementsByClassName("main").classList.add('hidden');
 });
 
