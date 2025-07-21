@@ -22,3 +22,6 @@ Il foglio di calcolo "hrafnkel_edges" contiene le interazioni tra i personaggi:
 - action: il codice dell'azione, come descritto nel foglio di calcolo "action_codes";
 - chapter: il capitolo in cui l'azione è descritta;
 - page: la pagina in cui l'azione è descritta.   
+
+## Autore
+[Gaglione Giulia](https://github.com/giug2)  
