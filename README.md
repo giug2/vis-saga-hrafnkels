@@ -21,7 +21,12 @@ Il foglio di calcolo "hrafnkel_edges" contiene le interazioni tra i personaggi:
 - sink: l'id del secondo personaggio coinvolto nell'interazione;
 - action: il codice dell'azione, come descritto nel foglio di calcolo "action_codes";
 - chapter: il capitolo in cui l'azione è descritta;
-- page: la pagina in cui l'azione è descritta.   
+- page: la pagina in cui l'azione è descritta.
+
+### Demo:
+![Frontend](demo/frontend.png)  
+[Guarda la demo del progetto con il grafo completo](demo/grafo_completo.gif)  
+[Guarda la demo del progetto con il grafo filtrato per capitoli](demo/grafo_completo.gif)
 
 ## Autore
 [Gaglione Giulia](https://github.com/giug2)  
