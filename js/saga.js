@@ -19,7 +19,6 @@ function leggiJSON() {
       window.gender_codes = data.gender_codes;
 
       document.getElementById("drawButton").disabled = false;
-      document.getElementById("loadFileFromClient").disabled = true;
     })
     .catch(error => {
       console.log('Si è verificato un errore:', error);
@@ -88,13 +87,6 @@ function findConnectedComponent(selectedNodeId) {
   }
 
   return component;
-}
-
-/* 
- * Funzione che verifica se un nodo appartiene a una data componente connessa.
- */
-function isNodeInComponent(node, component) {
-  return component.has(node.id);
 }
 
 /* 
@@ -357,12 +349,3 @@ function draw() {
     showLinkPopup();
   }, 2500);
 }
-
-/* 
- * Funzione che disattiva interfaccia interattiva prima che l’utente lasci la pagina.
- */
-window.addEventListener("beforeunload", function(event) {
-  document.getElementById("drawButton").disabled = true;
-  document.getElementById("myCheckbox").checked = false;
-  document.getElementById("check-span").classList.add('hidden');
-});
