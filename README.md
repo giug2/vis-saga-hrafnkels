@@ -26,7 +26,7 @@ Il foglio di calcolo "hrafnkel_edges" contiene le interazioni tra i personaggi:
 ### Demo:
 ![Frontend](demo/frontend.png)  
 [Guarda la demo del progetto con il grafo completo](demo/grafo_completo.gif)  
-[Guarda la demo del progetto con il grafo filtrato per capitoli](demo/grafo_completo.gif)
+[Guarda la demo del progetto con il grafo filtrato per capitoli](demo/grafo_per_capitoli.gif)
 
 ## Autore
 [Gaglione Giulia](https://github.com/giug2)  
