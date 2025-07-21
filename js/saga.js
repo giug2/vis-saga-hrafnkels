@@ -1,13 +1,16 @@
-var primaVolta=true;
-var node;
-var link;
-var width = 800;
-var height = 500;
+// Variabili globali
+var primaVolta = true; // Indica se è il primo disegno del grafo
+var node;              
+var link;              
+var width = 800;       // Larghezza SVG
+var height = 500;      // Altezza SVG
 
-
-/* Funzione che legge i dati contenuti nel file JSON */
+/* 
+ * Funzione che legge il file JSON locale.
+ * Abilita il pulsante per disegnare il grafo.
+ */
 function leggiJSON() {
-  fetch('dataset/hrafnkel_saga_network.json') 
+  fetch('dataset/hrafnkel_saga_network.json')
     .then(response => response.json())
     .then(data => {
       window.nodes = data.nodes;
@@ -23,14 +26,18 @@ function leggiJSON() {
     });
 }
 
-
-/* Funzione che carica in automatico i dati al caricamento della pagina */
+/* 
+ * Funzione che viene eseguita al caricamento della pagina.
+ * Chiama automaticamente la funzione per leggere il JSON.
+ */
 window.onload = function() {
   leggiJSON();
 };
 
-
-/* Funzione che gestisce lo slider */
+/* 
+ * Gestione dinamica dello slider e della sua visibilità.
+ * Se il checkbox è attivo, mostra lo slider per selezionare il capitolo.
+ */
 window.addEventListener('DOMContentLoaded', function() {
   const checkbox = document.getElementById("myCheckbox");
   const sliderContainer = document.getElementById("slider-container");
@@ -45,20 +52,20 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Aggiorna il valore del capitolo mostrato
   slider.addEventListener('input', function () {
     valueLabel.textContent = "Capitolo " + slider.value;
   });
 });
 
-
-/* Funzione per trovare la componente connessa al nodo selezionato */
+/* 
+ * Funzione per trovare la componente connessa che contiene un certo nodo.
+ * Usa BFS per esplorare solo i link con action ≤ 2.
+ */
 function findConnectedComponent(selectedNodeId) {
   const component = new Set();
   const visited = new Set();
   const queue = [selectedNodeId];
 
-  // Utilizza una ricerca in ampiezza per trovare tutti i nodi connessi
   while (queue.length > 0) {
     const nodeId = queue.shift();
     component.add(nodeId);
@@ -79,39 +86,39 @@ function findConnectedComponent(selectedNodeId) {
       }
     });
   }
+
   return component;
 }
 
-
-/* Funzione per verificare se un nodo appartiene a una componente specifica */
+/* 
+ * Funzione che verifica se un nodo appartiene a una data componente connessa.
+ */
 function isNodeInComponent(node, component) {
   return component.has(node.id);
 }
 
-
-/* Funzione che restituisce la descrizione testuale */
-function readAction(nAction){
+/* 
+ * Funzione che restituisce la descrizione testuale di un tipo di azione.
+ */
+function readAction(nAction) {
   var actionCodesObject = window.action_codes[nAction];
   var actionDescription = actionCodesObject['action description'];
   return actionDescription;
 }
 
-
-/* Funzione che mostra un popup informativo quando l’utente passa il mouse su un  link */
+/* 
+ * Mostra un popup informativo quando si passa il mouse su un link.
+ * Il popup mostra la relazione tra i due personaggi.
+ */
 function showLinkPopup() {
   d3.selectAll(".link")
     .on("mouseover", function(d) {
-      // Rimuove eventuali popup esistenti
       d3.select(".popup").remove();
 
-      // Ottiene coordinate del mouse
       var mouseX = d3.event.pageX;
       var mouseY = d3.event.pageY;
-
-      // Ottiene la descrizione dell’azione
       var actionDescription = readAction(d.action);
 
-      // Crea il popup
       var popup = d3.select("body")
         .append("div")
         .attr("class", "popup")
@@ -131,13 +138,12 @@ function showLinkPopup() {
     });
 }
 
-
-/* Funzione che mostra un popup informativo quando l’utente passa il mouse su un nodo 
-   Inoltre evidenzia solo i link e nodi connessi al nodo su cui si passa il mouse */
+/* 
+ * Mostra un popup e evidenzia i nodi e link connessi quando si passa il mouse su un nodo.
+ */
 function showNode() {
   d3.selectAll(".node")
     .on("mouseover", function(d) {
-      // Evidenzia nodi e link connessi
       d3.selectAll(".node")
         .style("opacity", function(o) {
           return isConnected(d, o) ? 1 : 0.1;
@@ -148,7 +154,6 @@ function showNode() {
           return (o.source.id === d.id || o.target.id === d.id) ? 1 : 0.05;
         });
 
-      // Crea il popup
       var mouseX = d3.event.pageX;
       var mouseY = d3.event.pageY;
 
@@ -164,16 +169,10 @@ function showNode() {
         .style("border-radius", "5px")
         .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)");
 
-      popup.append("h2")
-        .text(d.label + " [" + d.id + "]");
+      popup.append("h2").text(d.label + " [" + d.id + "]");
 
-      if (d.chapter !== undefined) {
-        popup.append("p").text("Chapter: " + d.chapter);
-      }
-
-      if (d.page !== undefined) {
-        popup.append("p").text("Page: " + d.page);
-      }
+      if (d.chapter !== undefined) popup.append("p").text("Chapter: " + d.chapter);
+      if (d.page !== undefined) popup.append("p").text("Page: " + d.page);
 
       var genderCodesObject = window.gender_codes[d.gender];
       var genderDescription = genderCodesObject ? genderCodesObject['gender description'] : "N/A";
@@ -181,17 +180,16 @@ function showNode() {
 
       popup.append("p").text("Gender: " + genderDescription + " " + genderSymbol);
     })
-    .on("mouseout", function(d) {
+    .on("mouseout", function() {
       d3.select(".popup").remove();
-
-      // Ripristina opacità normale
       d3.selectAll(".node").style("opacity", 1);
       d3.selectAll(".link").style("opacity", 1);
     });
 }
 
-
-/* Funzione di ausilio per capire se due nodi sono connessi tra loro */
+/* 
+ * Verifica se due nodi sono direttamente connessi.
+ */
 function isConnected(a, b) {
   return window.links.some(function(l) {
     return (l.source.id === a.id && l.target.id === b.id) ||
@@ -199,32 +197,34 @@ function isConnected(a, b) {
   }) || a.id === b.id;
 }
 
-
-/* Funzione che restituisce il colore degli archi in base al tipo di relazione che unisce i due nodi */
+/* 
+ * Restituisce un colore per un arco in base al tipo di relazione:
+ */
 function getColorByAction(action) {
   const code = window.action_codes[action];
-  if (!code) return "#ff00d0d1"; // fallback se l'action non esiste
+  if (!code) return "#ff00d0d1";
 
-  if (code.isFamily === 1) {
-    return "#ffd500ff"; // parentela
-  }
+  if (code.isFamily === 1) return "#ffd500ff";
 
   switch (parseInt(code.hostilityLevel)) {
-    case 0: return "#6a6565ff"; // neutra o cooperativa
-    case 1: return "#366e38ff"; // lievemente positiva / neutra
-    case 2: return "#6b1515ff"; // ostile
-    case 3: return "#2c0101ff"; // molto ostile
-    default: return "#ff00d0d1"; // fallback
+    case 0: return "#6a6565ff";
+    case 1: return "#366e38ff";
+    case 2: return "#6b1515ff";
+    case 3: return "#2c0101ff";
+    default: return "#ff00d0d1";
   }
 }
 
-
-/* Funzione per visualizzare il grafo */
+/* 
+ * Disegna il grafo nella pagina, usando un layout force-directed.
+ * Supporta filtro per capitolo tramite checkbox e slider.
+ */
 function draw() {
-  document.getElementById("check-span").classList.remove("hidden"); 
-  document.getElementById("legendContainer").classList.remove("hidden"); 
+  document.getElementById("check-span").classList.remove("hidden");
+  document.getElementById("legendContainer").classList.remove("hidden");
   document.getElementById("graph-container").classList.remove("hidden");
-  // Parametri del layout force-directed
+
+  // Parametri per forza fisica del grafo
   var charge = -120;
   var linkDistance = 120;
   var gravity = 0.1;
@@ -236,7 +236,7 @@ function draw() {
 
   var chapterSlider = document.getElementById("chapter-slider");
 
-  // Inizializzazione del layout force-directed di D3
+  // Inizializza layout force-directed
   force = d3.layout.force()
     .charge(charge)
     .linkDistance(linkDistance)
@@ -248,22 +248,18 @@ function draw() {
     .chargeDistance(chargeDistance)
     .size([width, height]);
 
-  // Rimuove i nodi e i link esistenti se non è la prima volta
+  // Rimuove nodi e link precedenti
   if (!primaVolta) {
     node.remove();
     link.remove();
   }
 
-  // Seleziona l'SVG e imposta dimensioni
-  svg = d3.select("#graphSVG")
-    .attr("width", width)
-    .attr("height", height);
+  svg = d3.select("#graphSVG").attr("width", width).attr("height", height);
 
   nodi = window.nodes;
   links = window.links;
 
   if (primaVolta === true) {
-    // Corregge gli indici dei link (probabilmente partono da 1)
     links.forEach(function(link) {
       link.source = link.source - 1;
       link.target = link.target - 1;
@@ -272,23 +268,21 @@ function draw() {
 
   primaVolta = false;
 
-  // Se è selezionato il checkbox per il grafo filtrato per capitolo
+  // Filtro per capitolo
   if (document.getElementById("myCheckbox").checked) {
     var nodiCapitolo = [];
-
-    // Filtra i nodi per capitolo selezionato
     for (var i = 0; i < nodi.length; i++) {
-      var appartenenza = nodi[i].chapter <= parseInt(chapterSlider.value);
-      if (appartenenza) nodiCapitolo.push(nodi[i].id);
+      if (nodi[i].chapter <= parseInt(chapterSlider.value)) {
+        nodiCapitolo.push(nodi[i].id);
+      }
     }
 
-    // Disegna solo i link i cui nodi estremi sono inclusi nei nodi filtrati
     link = svg.selectAll(".link")
       .data(links)
       .enter().append("path")
       .filter(function(d) {
         return nodiCapitolo.includes(d.source.id) &&
-              nodiCapitolo.includes(d.target.id);
+               nodiCapitolo.includes(d.target.id);
       })
       .attr("class", "link")
       .attr("fill", "none")
@@ -297,7 +291,6 @@ function draw() {
         return getColorByAction(d.action);
       });
 
-    // Disegna i nodi filtrati
     node = svg.selectAll(".node")
       .data(nodi)
       .enter().append("circle")
@@ -309,14 +302,13 @@ function draw() {
         return (d.chapter === parseInt(chapterSlider.value)) ? 12 : 10;
       })
       .style("fill", d => {
-        if (d.gender === 1) return "#214b9fff";     // blu
-        if (d.gender === 0) return "#990f0fff";   // rosso
-          return "#0e770eff";                              // verde per neutro o mancante
+        if (d.gender === 1) return "#214b9fff";
+        if (d.gender === 0) return "#990f0fff";
+        return "#0e770eff";
       })
       .call(force.drag);
   } else {
-    
-    // Disegna il grafo completo (nessun filtro per capitolo)
+    // Disegna grafo completo
     link = svg.selectAll(".link")
       .data(links)
       .enter().append("path")
@@ -327,26 +319,22 @@ function draw() {
         return getColorByAction(d.action);
       });
 
-
     node = svg.selectAll(".node")
       .data(nodi)
       .enter().append("circle")
       .attr("class", "node")
       .attr("r", 10)
       .style("fill", d => {
-        if (d.gender === 1) return "#214b9fff";     // blu
-        if (d.gender === 0) return "#990f0fff";   // rosso
-          return "#0e770eff";                              // verde per neutro o mancante
+        if (d.gender === 1) return "#214b9fff";
+        if (d.gender === 0) return "#990f0fff";
+        return "#0e770eff";
       })
       .call(force.drag);
   }
 
-  // Avvia il layout force-directed
-  force.nodes(nodi)
-    .links(links)
-    .start();
+  // Simulazione
+  force.nodes(nodi).links(links).start();
 
-  // Aggiorna posizioni dei nodi e dei link a ogni "tick"
   force.on("tick", function() {
     link.attr("d", function(d) {
       const x1 = d.source.x;
@@ -355,26 +343,26 @@ function draw() {
       const y2 = d.target.y;
       const dx = x2 - x1;
       const dy = y2 - y1;
-      const dr = Math.sqrt(dx * dx + dy * dy) * 1.5; // raggio per curva
+      const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
       return `M${x1},${y1} A${dr},${dr} 0 0,1 ${x2},${y2}`;
-      });
+    });
 
-    node.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
+    node.attr("cx", d => d.x)
+        .attr("cy", d => d.y);
   });
 
-  // Dopo un breve delay, abilita tooltip e info su nodi e link
+  // Mostra info dopo piccolo delay
   setTimeout(function() {
     showNode();
     showLinkPopup();
   }, 2500);
 }
 
- 
-/* Funzione che al caricamento della pagina disattiva tutte le funzioni attivate */
+/* 
+ * Funzione che disattiva interfaccia interattiva prima che l’utente lasci la pagina.
+ */
 window.addEventListener("beforeunload", function(event) {
   document.getElementById("drawButton").disabled = true;
   document.getElementById("myCheckbox").checked = false;
   document.getElementById("check-span").classList.add('hidden');
 });
-
