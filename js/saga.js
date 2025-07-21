@@ -287,7 +287,7 @@ function getColorByAction(action) {
   if (!code) return "#ff00d0d1"; // fallback se l'action non esiste
 
   if (code.isFamily === 1) {
-    return "#d2bc3cff"; // parentela
+    return "#ffd500ff"; // parentela
   }
 
   switch (parseInt(code.hostilityLevel)) {
