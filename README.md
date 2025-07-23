@@ -1,4 +1,4 @@
-# Saga Hrafnkels
+# ⚔️ Saga Hrafnkels
 Progetto finale per il corso di Visualizzazione delle Informazioni dell'A.A. 2024/2025.  
 
 ## La storia
