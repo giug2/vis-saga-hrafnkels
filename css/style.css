@@ -119,6 +119,26 @@ html, body {
   margin-top: 0.5em;
 }
 
+.noUi-target {
+  width: 100%;
+  height: 5px;
+  border-radius: 5px;
+  background: #a76202;
+  cursor: pointer;
+}
+
+.noUi-handle {
+  width: 16px;
+  height: 10px;
+  border-radius: 4px;
+  background: #4e3300;
+  top: -10px; /* centrato verticalmente */
+  cursor: ew-resize;
+  box-shadow: none;
+  border: none;
+  outline: none;
+}
+
 /* ==================== Visibilità dinamica ==================== */
 .hidden {
   display: none;

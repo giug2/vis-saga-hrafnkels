@@ -1,9 +1,8 @@
 // Variabili globali
-var primaVolta = true; // Indica se è il primo disegno del grafo
 var node;              
 var link;              
-var width = 800;       // Larghezza SVG
-var height = 500;      // Altezza SVG
+var width = 900;       // Larghezza SVG
+var height = 600;      // Altezza SVG
 
 /* 
  * Funzione che legge il file JSON locale.
@@ -18,7 +17,7 @@ function leggiJSON() {
       window.action_codes = data.action_codes;
       window.gender_codes = data.gender_codes;
 
-      document.getElementById("drawButton").disabled = false;
+        draw();
     })
     .catch(error => {
       console.log('Si è verificato un errore:', error);
@@ -39,20 +38,47 @@ window.onload = function() {
  */
 window.addEventListener('DOMContentLoaded', function() {
   const checkbox = document.getElementById("myCheckbox");
-  const sliderContainer = document.getElementById("slider-container");
   const slider = document.getElementById("chapter-slider");
   const valueLabel = document.getElementById("chapter-value");
 
-  checkbox.addEventListener('change', function () {
-    if (checkbox.checked) {
-      sliderContainer.classList.remove('hidden');
-    } else {
-      sliderContainer.classList.add('hidden');
+  // Inizializzo lo slider noUiSlider sul div chapter-slider
+  noUiSlider.create(slider, {
+    start: [1, 16],        // range iniziale
+    connect: true,
+    range: {
+      min: 1,
+      max: 16
+    },
+    step: 1,
+    tooltips: [true, true],
+    format: {
+      to: value => Math.round(value),
+      from: value => Number(value)
     }
   });
 
-  slider.addEventListener('input', function () {
-    valueLabel.textContent = "Capitolo " + slider.value;
+  // Nascondi slider all'avvio
+  slider.classList.add('hidden');
+  valueLabel.textContent = 'Capitoli dal 1 al 16';
+
+  // Toggle slider alla spunta checkbox
+  checkbox.addEventListener('change', () => {
+    if (checkbox.checked) {
+      valueLabel.classList.remove('hidden');
+      slider.classList.remove('hidden');
+    } else {
+      valueLabel.classList.add('hidden');
+      slider.classList.add('hidden');
+    }
+    draw();  // ridisegna il grafo filtrando o no
+  });
+
+  // Aggiorna testo e ridisegna quando slider cambia
+  slider.noUiSlider.on('update', (values) => {
+    const minChapter = values[0];
+    const maxChapter = values[1];
+    valueLabel.textContent = `Capitoli dal ${minChapter} al ${maxChapter}`;
+    draw();
   });
 });
 
@@ -212,24 +238,66 @@ function getColorByAction(action) {
  * Supporta filtro per capitolo tramite checkbox e slider.
  */
 function draw() {
-  document.getElementById("check-span").classList.remove("hidden");
-  document.getElementById("legendContainer").classList.remove("hidden");
-  document.getElementById("graph-container").classList.remove("hidden");
-
-  // Parametri per forza fisica del grafo
-  var charge = -120;
-  var linkDistance = 120;
+  var charge = -300;
+  var linkDistance = 100;
   var gravity = 0.1;
-  var linkStrength = 1;
+  var linkStrength = 0.3;
   var friction = 0.9;
   var theta = 0.8;
   var alpha = 0.1;
-  var chargeDistance = 1000;
+  var chargeDistance = 1500;
 
-  var chapterSlider = document.getElementById("chapter-slider");
+  var svg = d3.select("#graphSVG").attr("width", width).attr("height", height);
+  svg.selectAll("*").remove();
 
-  // Inizializza layout force-directed
-  force = d3.layout.force()
+  // Definizione delle frecce
+  const defs = svg.append("defs");
+  window.action_codes.forEach((label, action) => {
+    defs.append("marker")
+      .attr("id", "arrow" + action)
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 18)
+      .attr("refY", 0)
+      .attr("markerWidth", 4)
+      .attr("markerHeight", 4)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", getColorByAction(action));
+  });
+
+  // Capitoli selezionati
+  const sliderActive = document.getElementById("myCheckbox").checked;
+  let range = [1, 16];
+  if (sliderActive) {
+    range = document.getElementById("chapter-slider").noUiSlider.get().map(Number);
+  }
+  const [minChapter, maxChapter] = range;
+
+  // Filtro nodi e mappa
+  const nodi = window.nodes.filter(n => n.chapter >= minChapter && n.chapter <= maxChapter);
+  const validNodeIds = new Set(nodi.map(n => n.id));
+  const nodeMap = new Map(nodi.map(n => [n.id, n]));
+
+  // Filtro e normalizzazione link
+  const links = window.links
+    .filter(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return validNodeIds.has(sourceId) && validNodeIds.has(targetId);
+    })
+    .map(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+      return {
+        ...l,
+        source: nodeMap.get(sourceId),
+        target: nodeMap.get(targetId)
+      };
+    });
+
+  // Inizializza forza
+  const force = d3.layout.force()
     .charge(charge)
     .linkDistance(linkDistance)
     .gravity(gravity)
@@ -240,95 +308,47 @@ function draw() {
     .chargeDistance(chargeDistance)
     .size([width, height]);
 
-  // Rimuove nodi e link precedenti
-  if (!primaVolta) {
-    node.remove();
-    link.remove();
-  }
+  // Disegna link
+  const link = svg.selectAll(".link")
+    .data(links)
+    .enter().append("path")
+    .attr("class", "link")
+    .attr("fill", "none")
+    .attr("stroke-width", 3)
+    .attr("marker-end", d => "url(#arrow" + d.action + ")")
+    .attr("stroke", d => getColorByAction(d.action));
 
-  svg = d3.select("#graphSVG").attr("width", width).attr("height", height);
+  // Disegna nodi
+  const node = svg.selectAll(".node")
+    .data(nodi)
+    .enter().append("circle")
+    .attr("class", "node")
+    .attr("r", d => (d.chapter === minChapter ? 12 : 10))
+    .style("fill", d => {
+      if (d.gender === 1) return "#214b9fff";
+      if (d.gender === 0) return "#990f0fff";
+      return "#0e770eff";
+    })
+    .call(force.drag);
 
-  nodi = window.nodes;
-  links = window.links;
-
-  if (primaVolta === true) {
-    links.forEach(function(link) {
-      link.source = link.source - 1;
-      link.target = link.target - 1;
-    });
-  }
-
-  primaVolta = false;
-
-  // Filtro per capitolo
-  if (document.getElementById("myCheckbox").checked) {
-    var nodiCapitolo = [];
-    for (var i = 0; i < nodi.length; i++) {
-      if (nodi[i].chapter <= parseInt(chapterSlider.value)) {
-        nodiCapitolo.push(nodi[i].id);
-      }
-    }
-
-    link = svg.selectAll(".link")
-      .data(links)
-      .enter().append("path")
-      .filter(function(d) {
-        return nodiCapitolo.includes(d.source.id) &&
-               nodiCapitolo.includes(d.target.id);
-      })
-      .attr("class", "link")
-      .attr("fill", "none")
-      .attr("stroke-width", 4)
-      .attr("stroke", function(d) {
-        return getColorByAction(d.action);
-      });
-
-    node = svg.selectAll(".node")
-      .data(nodi)
-      .enter().append("circle")
-      .filter(function(d) {
-        return nodiCapitolo.includes(d.id);
-      })
-      .attr("class", "node")
-      .attr("r", function(d) {
-        return (d.chapter === parseInt(chapterSlider.value)) ? 12 : 10;
-      })
-      .style("fill", d => {
-        if (d.gender === 1) return "#214b9fff";
-        if (d.gender === 0) return "#990f0fff";
-        return "#0e770eff";
-      })
-      .call(force.drag);
-  } else {
-    // Disegna grafo completo
-    link = svg.selectAll(".link")
-      .data(links)
-      .enter().append("path")
-      .attr("class", "link")
-      .attr("fill", "none")
-      .attr("stroke-width", 3)
-      .attr("stroke", function(d) {
-        return getColorByAction(d.action);
-      });
-
-    node = svg.selectAll(".node")
-      .data(nodi)
-      .enter().append("circle")
-      .attr("class", "node")
-      .attr("r", 10)
-      .style("fill", d => {
-        if (d.gender === 1) return "#214b9fff";
-        if (d.gender === 0) return "#990f0fff";
-        return "#0e770eff";
-      })
-      .call(force.drag);
-  }
-
-  // Simulazione
+  // Avvia simulazione
   force.nodes(nodi).links(links).start();
 
-  force.on("tick", function() {
-    link.attr("d", function(d) {
+  force.on("tick", function () {
+    node.each(function (d) {
+      const r = 12;
+      const padding = 5;
+
+      if (d.x < r || d.x > width - r) d.vx *= -1;
+      if (d.y < r || d.y > height - r) d.vy *= -1;
+
+      if (d.x < r) d.x = r;
+      if (d.x > width - r - padding) d.x = width - r - padding;
+      if (d.y < r) d.y = r;
+      if (d.y > height - r - padding) d.y = height - r - padding;
+    });
+
+    link.attr("d", function (d) {
       const x1 = d.source.x;
       const y1 = d.source.y;
       const x2 = d.target.x;
@@ -339,13 +359,13 @@ function draw() {
       return `M${x1},${y1} A${dr},${dr} 0 0,1 ${x2},${y2}`;
     });
 
-    node.attr("cx", d => d.x)
-        .attr("cy", d => d.y);
+    node.attr("cx", d => d.x).attr("cy", d => d.y);
   });
 
-  // Mostra info dopo piccolo delay
-  setTimeout(function() {
+  // Riattiva interazioni
+  setTimeout(function () {
     showNode();
     showLinkPopup();
   }, 2500);
 }
+
