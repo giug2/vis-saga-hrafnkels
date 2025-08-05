@@ -162,15 +162,21 @@ function showLinkPopup() {
 function showNode() {
   d3.selectAll(".node")
     .on("mouseover", function(d) {
-      d3.selectAll(".node")
-        .style("opacity", function(o) {
-          return isConnected(d, o) ? 1 : 0.1;
-        });
+      // evidenzia solo nodi connessi direttamente al nodo d (compreso d)
+     d3.selectAll(".node")
+      .style("opacity", function(o) {
+        return isConnected(d, o) ? 1 : 0.1;  // evidenzia nodo + adiacenti
+      });
 
+
+      // evidenzia solo link incidenti al nodo d
       d3.selectAll(".link")
         .style("opacity", function(o) {
           return (o.source.id === d.id || o.target.id === d.id) ? 1 : 0.05;
         });
+
+      // popup
+      d3.select(".popup").remove(); // rimuovi popup precedente
 
       var mouseX = d3.event.pageX;
       var mouseY = d3.event.pageY;
@@ -185,7 +191,8 @@ function showNode() {
         .style("padding", "8px")
         .style("border", "1px solid #ccc")
         .style("border-radius", "5px")
-        .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)");
+        .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)")
+        .style("pointer-events", "none"); // per evitare che popup intercetti mouse
 
       popup.append("h2").text(d.label + " [" + d.id + "]");
 
@@ -200,20 +207,24 @@ function showNode() {
     })
     .on("mouseout", function() {
       d3.select(".popup").remove();
+
+      // ripristina opacità a tutti
       d3.selectAll(".node").style("opacity", 1);
       d3.selectAll(".link").style("opacity", 1);
     });
 }
 
-/* 
- * Verifica se due nodi sono direttamente connessi.
- */
+// Funzione che verifica se due nodi sono direttamente connessi (o sono lo stesso nodo)
 function isConnected(a, b) {
+  if (a.id === b.id) return true;
   return window.links.some(function(l) {
-    return (l.source.id === a.id && l.target.id === b.id) ||
-           (l.source.id === b.id && l.target.id === a.id);
-  }) || a.id === b.id;
+    var sourceId = typeof l.source === "object" ? l.source.id : l.source;
+    var targetId = typeof l.target === "object" ? l.target.id : l.target;
+    return (sourceId === a.id && targetId === b.id) || 
+           (sourceId === b.id && targetId === a.id);
+  });
 }
+
 
 /* 
  * Restituisce un colore per un arco in base al tipo di relazione:
@@ -238,14 +249,15 @@ function getColorByAction(action) {
  * Supporta filtro per capitolo tramite checkbox e slider.
  */
 function draw() {
-  var charge = -300;
-  var linkDistance = 100;
-  var gravity = 0.1;
-  var linkStrength = 0.3;
+  var charge = -400;           // maggiore repulsione
+  var linkDistance = 100;      // distanzia meglio i nodi
+  var gravity = 0.1;          // meno forza centripeta
+  var linkStrength = 0.1;      // archi più elastici
   var friction = 0.9;
   var theta = 0.8;
   var alpha = 0.1;
-  var chargeDistance = 1500;
+  var chargeDistance = 1800;   // distanza massima di repulsione
+
 
   var svg = d3.select("#graphSVG").attr("width", width).attr("height", height);
   svg.selectAll("*").remove();
