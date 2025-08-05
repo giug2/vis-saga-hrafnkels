@@ -5,117 +5,6 @@ var width = 900;       // Larghezza SVG
 var height = 600;      // Altezza SVG
 
 /* 
- * Funzione che legge il file JSON locale.
- * Abilita il pulsante per disegnare il grafo.
- */
-function leggiJSON() {
-  fetch('dataset/hrafnkel_saga_network.json')
-    .then(response => response.json())
-    .then(data => {
-      window.nodes = data.nodes;
-      window.links = data.links;
-      window.action_codes = data.action_codes;
-      window.gender_codes = data.gender_codes;
-
-        draw();
-    })
-    .catch(error => {
-      console.log('Si è verificato un errore:', error);
-    });
-}
-
-/* 
- * Funzione che viene eseguita al caricamento della pagina.
- * Chiama automaticamente la funzione per leggere il JSON.
- */
-window.onload = function() {
-  leggiJSON();
-};
-
-/* 
- * Gestione dinamica dello slider e della sua visibilità.
- * Se il checkbox è attivo, mostra lo slider per selezionare il capitolo.
- */
-window.addEventListener('DOMContentLoaded', function() {
-  const checkbox = document.getElementById("myCheckbox");
-  const slider = document.getElementById("chapter-slider");
-  const valueLabel = document.getElementById("chapter-value");
-
-  // Inizializzo lo slider noUiSlider sul div chapter-slider
-  noUiSlider.create(slider, {
-    start: [1, 16],        // range iniziale
-    connect: true,
-    range: {
-      min: 1,
-      max: 16
-    },
-    step: 1,
-    tooltips: [true, true],
-    format: {
-      to: value => Math.round(value),
-      from: value => Number(value)
-    }
-  });
-
-  // Nascondi slider all'avvio
-  slider.classList.add('hidden');
-  valueLabel.textContent = 'Capitoli dal 1 al 16';
-
-  // Toggle slider alla spunta checkbox
-  checkbox.addEventListener('change', () => {
-    if (checkbox.checked) {
-      valueLabel.classList.remove('hidden');
-      slider.classList.remove('hidden');
-    } else {
-      valueLabel.classList.add('hidden');
-      slider.classList.add('hidden');
-    }
-    draw();  // ridisegna il grafo filtrando o no
-  });
-
-  // Aggiorna testo e ridisegna quando slider cambia
-  slider.noUiSlider.on('update', (values) => {
-    const minChapter = values[0];
-    const maxChapter = values[1];
-    valueLabel.textContent = `Capitoli dal ${minChapter} al ${maxChapter}`;
-    draw();
-  });
-});
-
-/* 
- * Funzione per trovare la componente connessa che contiene un certo nodo.
- * Usa BFS per esplorare solo i link con action ≤ 2.
- */
-function findConnectedComponent(selectedNodeId) {
-  const component = new Set();
-  const visited = new Set();
-  const queue = [selectedNodeId];
-
-  while (queue.length > 0) {
-    const nodeId = queue.shift();
-    component.add(nodeId);
-    visited.add(nodeId);
-
-    window.links.forEach(function(link) {
-      if (parseInt(link.action) <= 2) {
-        const sourceId = link.source.id;
-        const targetId = link.target.id;
-
-        if (sourceId === nodeId && !visited.has(targetId)) {
-          queue.push(targetId);
-          visited.add(targetId);
-        } else if (targetId === nodeId && !visited.has(sourceId)) {
-          queue.push(sourceId);
-          visited.add(sourceId);
-        }
-      }
-    });
-  }
-
-  return component;
-}
-
-/* 
  * Funzione che restituisce la descrizione testuale di un tipo di azione.
  */
 function readAction(nAction) {
@@ -128,7 +17,7 @@ function readAction(nAction) {
  * Mostra un popup informativo quando si passa il mouse su un link.
  * Il popup mostra la relazione tra i due personaggi.
  */
-function showLinkPopup() {
+function showLinkGraph() {
   d3.selectAll(".link")
     .on("mouseover", function(d) {
       d3.select(".popup").remove();
@@ -159,7 +48,7 @@ function showLinkPopup() {
 /* 
  * Mostra un popup e evidenzia i nodi e link connessi quando si passa il mouse su un nodo.
  */
-function showNode() {
+function showNodeGraph() {
   d3.selectAll(".node")
     .on("mouseover", function(d) {
       // evidenzia solo nodi connessi direttamente al nodo d (compreso d)
@@ -194,7 +83,7 @@ function showNode() {
         .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)")
         .style("pointer-events", "none"); // per evitare che popup intercetti mouse
 
-      popup.append("h2").text(d.label + " [" + d.id + "]");
+      popup.append("h2").text(d.label);
 
       if (d.chapter !== undefined) popup.append("p").text("Chapter: " + d.chapter);
       if (d.page !== undefined) popup.append("p").text("Page: " + d.page);
@@ -248,7 +137,7 @@ function getColorByAction(action) {
  * Disegna il grafo nella pagina, usando un layout force-directed.
  * Supporta filtro per capitolo tramite checkbox e slider.
  */
-function draw() {
+function drawGraph() {
   var charge = -400;           // maggiore repulsione
   var linkDistance = 100;      // distanzia meglio i nodi
   var gravity = 0.1;          // meno forza centripeta
@@ -376,8 +265,7 @@ function draw() {
 
   // Riattiva interazioni
   setTimeout(function () {
-    showNode();
-    showLinkPopup();
+    showNodeGraph();
+    showLinkGraph();
   }, 2500);
 }
-

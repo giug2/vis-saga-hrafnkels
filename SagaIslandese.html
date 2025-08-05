@@ -2,12 +2,16 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="css/style.css">
   <title>The Hrafnkels Saga</title>
   <script src="lib/d3.min.js"></script>
-  <script src="js/saga.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" rel="stylesheet">
+  <script src="js/uploadDate.js"></script>
+  <script src="js/interfaceUser.js"></script>
+  <script src="js/graph.js"></script>
+  <script src="js/timeline.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" rel="stylesheet">
   <link rel="icon" href="images/favicon.png" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
 </head>
@@ -24,78 +28,96 @@
   </div>
 
   <div style="text-align: center;">
-    <p id="menu">Tramite il tasto Draw si può attivare la creazione del grafo. Inoltre, spuntando il check-box dei capitoli, si può 
-      diesegnare, sempre cliccando sul tasto Draw, il grafo parziale fine al capitolo selezionato.
+    <p id="menu">Trami
     </p>
-  </div>
-
-  <div style="height: 15px;"></div>
-  <div id="legendContainer" style="margin-top: 10px; margin-bottom: 20px; text-align: center;">
-    <div id="legendNodi" style="margin-top: 10px; margin-bottom: 20px; text-align: center;">
-      <strong>Legenda nodi:</strong>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="15" height="15"><circle cx="7.5" cy="7.5" r="7.5" fill="#214b9fff" /></svg>
-        <span style="margin-left: 5px;">Maschio</span>
-      </div>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="15" height="15"><circle cx="7.5" cy="7.5" r="7.5" fill="#990f0fff" /></svg>
-        <span style="margin-left: 5px;">Femmina</span>
-      </div>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="15" height="15"><circle cx="7.5" cy="7.5" r="7.5" fill="#0e770eff" /></svg>
-        <span style="margin-left: 5px;">Altro/Non specificato</span>
-      </div>
-    </div>
-    <div id="legendArchi" style="margin-top: 10px; margin-bottom: 20px; text-align: center;">
-      <strong>Legenda archi:</strong>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#ffd500ff" stroke-width="3"/></svg>
-        <span style="margin-left: 5px;">Parentela</span>
-      </div>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#6a6565ff" stroke-width="3"/></svg>
-        <span style="margin-left: 5px;">Neutro/Cooperativo</span>
-      </div>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#366e38ff" stroke-width="3"/></svg>
-        <span style="margin-left: 5px;">Positivo</span>
-      </div>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#6b1515ff" stroke-width="3"/></svg>
-        <span style="margin-left: 5px;">Ostile</span>
-      </div>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#2c0101ff" stroke-width="3"/></svg>
-        <span style="margin-left: 5px;">Molto ostile</span>
-      </div>
-      <div style="display: inline-block; margin-left: 20px;">
-        <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#ff00d0d1" stroke-width="3"/></svg>
-        <span style="margin-left: 5px;">Non specificato</span>
-      </div>
-    </div>
   </div>
 
   <div style="height: 10px;"></div>
   <table class="center"> 
     <tr>
       <td>
-        <span id="check-span">
-          <label>Personaggi e relazioni tra i capitoli: </label>
-          <input type="checkbox" id="myCheckbox">
-        </span>
+        <button id="btnShowGraph" class="saga-button" disabled>Mostra Grafo</button>
+      </td>
+      <td style="padding-left: 20px;">
+        <button id="btnShowTimeline" class="saga-button" disabled>Mostra Timeline</button>
       </td>
     </tr>
   </table>
 
-  <div id="slider-container" class="full-width">
-    <div id="chapter-value" class="hidden">
-      Capitoli dal <span id="start-chapter">1</span> al <span id="end-chapter">16</span>
+  <div style="height: 15px;"></div>
+
+  <div id="legendContainer" style="margin-top: 10px; margin-bottom: 20px; text-align: center;">
+      <div id="legendNodi" style="margin-top: 10px; margin-bottom: 20px; text-align: center;">
+        <strong>Legenda nodi:</strong>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="15" height="15"><circle cx="7.5" cy="7.5" r="7.5" fill="#214b9fff" /></svg>
+          <span style="margin-left: 5px;">Maschio</span>
+        </div>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="15" height="15"><circle cx="7.5" cy="7.5" r="7.5" fill="#990f0fff" /></svg>
+          <span style="margin-left: 5px;">Femmina</span>
+        </div>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="15" height="15"><circle cx="7.5" cy="7.5" r="7.5" fill="#0e770eff" /></svg>
+          <span style="margin-left: 5px;">Altro/Non specificato</span>
+        </div>
+      </div>
+      <div id="legendArchi" style="margin-top: 10px; margin-bottom: 20px; text-align: center;">
+        <strong>Legenda archi:</strong>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#ffd500ff" stroke-width="3"/></svg>
+          <span style="margin-left: 5px;">Parentela</span>
+        </div>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#6a6565ff" stroke-width="3"/></svg>
+          <span style="margin-left: 5px;">Neutro/Cooperativo</span>
+        </div>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#366e38ff" stroke-width="3"/></svg>
+          <span style="margin-left: 5px;">Positivo</span>
+        </div>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#6b1515ff" stroke-width="3"/></svg>
+          <span style="margin-left: 5px;">Ostile</span>
+        </div>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#2c0101ff" stroke-width="3"/></svg>
+          <span style="margin-left: 5px;">Molto ostile</span>
+        </div>
+        <div style="display: inline-block; margin-left: 20px;">
+          <svg width="30" height="10"><line x1="0" y1="5" x2="30" y2="5" stroke="#ff00d0d1" stroke-width="3"/></svg>
+          <span style="margin-left: 5px;">Non specificato</span>
+        </div>
+      </div>
     </div>
-    <div id="chapter-slider"></div>
+
+  <div id="graphContainer" class="hidden">
+    <div style="height: 10px;"></div>
+    <table class="center"> 
+      <tr>
+        <td>
+          <span id="check-span">
+            <label>Personaggi e relazioni tra i capitoli: </label>
+            <input type="checkbox" id="myCheckbox">
+          </span>
+        </td>
+      </tr>
+    </table>
+
+    <div id="slider-container" class="full-width">
+      <div id="chapter-value" class="hidden">
+        Capitoli dal <span id="start-chapter">1</span> al <span id="end-chapter">16</span>
+      </div>
+      <div id="chapter-slider"></div>
+    </div>
+
+    <div id="graph-container" style="text-align: center;">
+      <svg id="graphSVG" style="border-style: solid;"></svg>
+    </div>
   </div>
 
-  <div id="graph-container" style="text-align: center;">
-    <svg id="graphSVG" style="border-style: solid;"></svg>
+  <div id="timelineContainer" class="hidden">
+    <svg id="timelineSVG" style="border-style: solid;"></svg>
   </div>
 
 </body>

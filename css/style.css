@@ -62,12 +62,11 @@ html, body {
 .saga-button {
   background-color: #f5f0e1;
   border: none;
-  color: #432406;
-  font-family: 'MedievalSharp', Georgia, serif;
+  color: #843c1d;
+  font-family: 'Georgia', serif;
   font-size: 16px;
   padding: 10px 20px;
 }
-
 .saga-button:disabled {
   background-color: #cccccc;
   color: #999999;
@@ -177,9 +176,26 @@ html, body {
 }
 
 /* ==================== Contenitore SVG del grafo ==================== */
-#graphSVG {
+#graphSVG{
   background-color: rgb(226, 186, 134); 
   border: 3px solid #af7f53;
   border-radius: 10px;
   margin-bottom: 30px;
+}
+
+#timelineSVGContainer {
+  width: 100%;               /* o una larghezza fissa, tipo 1200px */
+  text-align: center;        /* centra inline-block al suo interno */
+}
+
+#timelineSVGContainer svg {
+  display: inline-block;     /* consente a svg di essere centrato con text-align */
+  background-color: rgb(226, 186, 134); 
+  border: 3px solid #af7f53;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.tooltip {
+  transition: opacity 0.2s;
 }
