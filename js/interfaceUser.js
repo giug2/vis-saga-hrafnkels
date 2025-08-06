@@ -1,8 +1,13 @@
+/*
+* Gestione delle interazioni dell'utente.
+*/
 window.addEventListener('DOMContentLoaded', function() {
   const btnShowGraph = document.getElementById('btnShowGraph');
   const graphContainer = document.getElementById('graphContainer');
   const btnShowTimeline = document.getElementById('btnShowTimeline');
   const timelineContainer = document.getElementById('timelineContainer');
+  const btnShowTree = document.getElementById('btnShowTree');
+  const treeContainer = document.getElementById('treeContainer');
 
   const checkbox = document.getElementById("myCheckbox");
   const slider = document.getElementById("chapter-slider");
@@ -10,19 +15,30 @@ window.addEventListener('DOMContentLoaded', function() {
 
   btnShowGraph.disabled = false;
   btnShowTimeline.disabled = false;
+  btnShowTree.disabled = false;
 
   btnShowGraph.addEventListener('click', () => {
     graphContainer.classList.remove('hidden');
     timelineContainer.classList.add('hidden');
+    treeContainer.classList.add('hidden');
     drawGraph();
   });
 
   btnShowTimeline.addEventListener('click', () => {
     graphContainer.classList.add('hidden');
     timelineContainer.classList.remove('hidden');
+    treeContainer.classList.add('hidden');
     drawTimeline();
   });
 
+  btnShowTree.addEventListener('click', () => {
+    graphContainer.classList.add('hidden');
+    timelineContainer.classList.add('hidden');
+    treeContainer.classList.remove('hidden');
+    setupDropdownAndListener(nodes, links);
+  });
+
+  // Creazione e gestione dello slider
   noUiSlider.create(slider, {
     start: [1, 16],
     connect: true,

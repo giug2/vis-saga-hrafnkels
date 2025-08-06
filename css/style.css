@@ -82,60 +82,66 @@ html, body {
   box-sizing: border-box;
 }
 
+#chapter-value {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.5em;
+  color: #4b2c1a;
+  margin-bottom: 1em;
+}
+
 #chapter-slider {
   width: 100%;
-  margin-bottom: 1em;
-  height: 2em;
+  height: 14px;
+  background: #af7f53;
+  border-radius: 7px;
+  outline: none;
+  cursor: pointer;
 }
 
 #chapter-slider::-webkit-slider-runnable-track {
-  height: 10px;
-  background: #aaa;
-  border-radius: 5px;
+  height: 14px;
+  background: #d6a46d;
+  border-radius: 7px;
 }
 
 #chapter-slider::-webkit-slider-thumb {
-  height: 50px;
-  width: 16px;
-  background: #444;
-  cursor: ew-resize;
-  margin-top: -10px;
-  border-radius: 4px;
-  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 30px;
+  background: #4e3300;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: -8px; 
+  border: 2px solid #af7f53;
+  box-shadow: 0 0 3px rgba(0,0,0,0.2);
+}
+
+#chapter-slider:hover::-webkit-slider-thumb {
+  background: #613d14;
 }
 
 #chapter-slider:focus {
   outline: none;
 }
 
-#chapter-value {
-  margin-bottom: 0.5em;
-  height: 1.5em;
-  width: 100%;
-  text-align: center;
-  font-weight: bold;
-  font-size: 1.5em;
-  margin-top: 0.5em;
-}
-
 .noUi-target {
-  width: 100%;
-  height: 5px;
-  border-radius: 5px;
-  background: #a76202;
-  cursor: pointer;
+  background: #d6a46d;
+  border: 3px solid #af7f53;
+  height: 14px;
+  border-radius: 7px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .noUi-handle {
-  width: 16px;
-  height: 10px;
-  border-radius: 4px;
   background: #4e3300;
-  top: -10px; /* centrato verticalmente */
+  border-radius: 6px;
+  border: 2px solid #af7f53;
+  width: 20px;
+  height: 30px;
+  top: -9px; /* per centrare */
+  box-shadow: 0 0 3px rgba(0,0,0,0.2);
   cursor: ew-resize;
-  box-shadow: none;
-  border: none;
-  outline: none;
 }
 
 /* ==================== Visibilità dinamica ==================== */
@@ -175,7 +181,7 @@ html, body {
   stroke-opacity: .6;
 }
 
-/* ==================== Contenitore SVG del grafo ==================== */
+/* ==================== Contenitori SVG  ==================== */
 #graphSVG{
   background-color: rgb(226, 186, 134); 
   border: 3px solid #af7f53;
@@ -184,18 +190,54 @@ html, body {
 }
 
 #timelineSVGContainer {
-  width: 100%;               /* o una larghezza fissa, tipo 1200px */
-  text-align: center;        /* centra inline-block al suo interno */
+  width: 100%;               
+  text-align: center;        
 }
 
 #timelineSVGContainer svg {
-  display: inline-block;     /* consente a svg di essere centrato con text-align */
+  display: inline-block;     
   background-color: rgb(226, 186, 134); 
   border: 3px solid #af7f53;
   border-radius: 10px;
   margin-bottom: 30px;
 }
 
-.tooltip {
-  transition: opacity 0.2s;
+#treeSVG {
+  background-color: rgb(226, 186, 134);
+  border: 3px solid #af7f53;
+  border-radius: 10px;
+  display: block;           
+  margin: 30px auto;        
+  width: 80%;   
+  height: 300px; 
+  max-width: 500px;  
+}
+
+/* ==================== Menù a tendina  ==================== */
+#personSelect {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 16px;
+  font-size: 18px;
+  font-family: sans-serif;
+  border-radius: 10px;
+  border: 3px solid #af7f53;
+  background-color: rgb(226, 186, 134); /* stesso sfondo del grafo */
+  color: #4b2c1a; /* marrone scuro per il testo */
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+  width: fit-content;
+  min-width: 300px;
+  text-align: center;
+  appearance: none; /* rimuove stile browser */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+#personSelect:hover {
+  background-color: rgb(236, 196, 144); /* più chiaro al passaggio */
+}
+
+#personSelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(175, 127, 83, 0.4);
 }

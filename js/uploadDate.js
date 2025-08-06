@@ -3,6 +3,9 @@ var links = [];
 var action_codes = {};
 var gender_codes = {};
 
+/*
+* Funzione per la lettura dei dati al load della pagina
+*/
 function leggiJSON() {
   return fetch('dataset/hrafnkel_saga_network.json')
     .then(response => response.json())
@@ -11,7 +14,6 @@ function leggiJSON() {
       links = data.links;
       action_codes = data.action_codes;
       gender_codes = data.gender_codes;
-      console.log("Dati caricati");
     })
     .catch(error => {
       console.error('Errore nel caricamento JSON:', error);

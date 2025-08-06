@@ -1,8 +1,8 @@
 // Variabili globali
 var node;              
 var link;              
-var width = 900;       // Larghezza SVG
-var height = 600;      // Altezza SVG
+var width = 900;   
+var height = 600;      
 
 /* 
  * Funzione che restituisce la descrizione testuale di un tipo di azione.
@@ -38,7 +38,11 @@ function showLinkGraph() {
         .style("border-radius", "5px")
         .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)");
 
-      popup.append("p").text(d.source.label + " " + actionDescription + " " + d.target.label);
+      let popupText = d.source.label + " " + actionDescription + " " + d.target.label;
+      if (d.chapter !== undefined && d.chapter !== null) {
+        popupText += " (Capitolo: " + d.chapter + ")";
+      }
+      popup.append("p").text(popupText);
     })
     .on("mouseout", function() {
       d3.select(".popup").remove();
@@ -56,7 +60,6 @@ function showNodeGraph() {
       .style("opacity", function(o) {
         return isConnected(d, o) ? 1 : 0.1;  // evidenzia nodo + adiacenti
       });
-
 
       // evidenzia solo link incidenti al nodo d
       d3.selectAll(".link")

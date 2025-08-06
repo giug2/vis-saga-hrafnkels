@@ -8,6 +8,7 @@
   <script src="js/interfaceUser.js"></script>
   <script src="js/graph.js"></script>
   <script src="js/timeline.js"></script>
+  <script src="js/tree.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="css/style.css">
@@ -22,13 +23,12 @@
   
   <div id="descriptionDiv">
     <p id="description">La saga di Hrafnkel è una delle saghe islandesi che racconta le avventure di capitani e contadini 
-    nell’Islanda orientale del X secolo. La rete della Saga di Hrafnkel descrive le relazioni tra i protagonisti della 
-    saga attraverso un grafo non orientato. Ogni nodo rappresenta un personaggio della saga, mentre gli archi rappresentano 
+    nell’Islanda orientale del X secolo. Ogni nodo rappresenta un personaggio della saga, mentre gli archi rappresentano 
     le azioni che essi compiono in ciascun capitolo della narrazione.</p>
   </div>
 
   <div style="text-align: center;">
-    <p id="menu">Trami
+    <p id="menu">È possibile la visualizzazzione dei personaggio e delle loro interazione tramite tre diverse forme.
     </p>
   </div>
 
@@ -40,6 +40,9 @@
       </td>
       <td style="padding-left: 20px;">
         <button id="btnShowTimeline" class="saga-button" disabled>Mostra Timeline</button>
+      </td>
+      <td style="padding-left: 20px;">
+        <button id="btnShowTree" class="saga-button" disabled>Mostra Albero gerarchico</button>
       </td>
     </tr>
   </table>
@@ -118,6 +121,11 @@
 
   <div id="timelineContainer" class="hidden">
     <svg id="timelineSVG" style="border-style: solid;"></svg>
+  </div>
+
+  <div id="treeContainer" class="hidden">
+    <select id="personSelect"></select>
+    <svg id="treeSVG" style="border-style: solid;"></svg>
   </div>
 
 </body>

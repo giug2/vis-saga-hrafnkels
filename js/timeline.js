@@ -5,15 +5,6 @@ var margin = { top: 40, right: 70, bottom: 100, left: 350 };
 
 
 /* 
- * Funzione che restituisce la descrizione testuale di un tipo di azione.
- */
-function readAction(nAction) {
-  var actionCodesObject = window.action_codes[nAction];
-  var actionDescription = actionCodesObject['action description'];
-  return actionDescription;
-}
-
-/* 
  * Mostra un popup informativo quando si passa il mouse su un link.
  * Il popup mostra la relazione tra i due personaggi.
  */
@@ -25,6 +16,12 @@ function showLinkTimeline() {
       var mouseX = d3.event.pageX;
       var mouseY = d3.event.pageY;
       var actionDescription = readAction(d.action);
+
+      var sourceNode = window.nodeMapById[d.source];
+      var targetNode = window.nodeMapById[d.target];
+
+      var sourceLabel = sourceNode ? sourceNode.label : d.source;
+      var targetLabel = targetNode ? targetNode.label : d.target;
 
       var popup = d3.select("body")
         .append("div")
@@ -38,21 +35,26 @@ function showLinkTimeline() {
         .style("border-radius", "5px")
         .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)");
 
-      popup.append("p").text(d.source.label + " " + actionDescription + " " + d.target.label);
+      let popupText = d.source.label + " " + actionDescription + " " + d.target.label;
+      if (d.chapter !== undefined && d.chapter !== null) {
+        popupText += " (Capitolo: " + d.chapter + ")";
+      }
+      popup.append("p").text(popupText);
     })
     .on("mouseout", function() {
       d3.select(".popup").remove();
     });
 }
 
+
 /* 
- * Mostra un popup e evidenzia i nodi e link connessi quando si passa il mouse su un nodo.
+ * Mostra un popup di un nodo quando si passa su di esso col mouse.
  */
 function showNodeTimeline() {
   d3.selectAll(".node")
     .on("mouseover", function(d) {
        // popup
-      d3.select(".popup").remove(); // rimuovi popup precedente
+      d3.select(".popup").remove(); 
 
       var mouseX = d3.event.pageX;
       var mouseY = d3.event.pageY;
@@ -68,11 +70,10 @@ function showNodeTimeline() {
         .style("border", "1px solid #ccc")
         .style("border-radius", "5px")
         .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)")
-        .style("pointer-events", "none"); // per evitare che popup intercetti mouse
+        .style("pointer-events", "none"); 
 
       popup.append("h2").text(d.label);
 
-      if (d.chapter !== undefined) popup.append("p").text("Chapter: " + d.chapter);
       if (d.page !== undefined) popup.append("p").text("Page: " + d.page);
 
       var genderCodesObject = window.gender_codes[d.gender];
@@ -84,32 +85,14 @@ function showNodeTimeline() {
     .on("mouseout", function() {
       d3.select(".popup").remove();
 
-      // ripristina opacità a tutti
       d3.selectAll(".node").style("opacity", 1);
       d3.selectAll(".link").style("opacity", 1);
     });
 }
 
-
 /* 
- * Restituisce un colore per un arco in base al tipo di relazione:
- */
-function getColorByAction(action) {
-  const code = window.action_codes[action];
-  if (!code) return "#ff00d0d1";
-
-  if (code.isFamily === 1) return "#ffd500ff";
-
-  switch (parseInt(code.hostilityLevel)) {
-    case 0: return "#6a6565ff";
-    case 1: return "#366e38ff";
-    case 2: return "#6b1515ff";
-    case 3: return "#2c0101ff";
-    default: return "#ff00d0d1";
-  }
-}
-
-// Funzione principale per disegnare la timeline
+* Funzione principale per la creazione della time line.
+*/
 function drawTimeline() {
   const container = d3.select("#timelineContainer");
   container.selectAll("*").remove();
@@ -122,7 +105,6 @@ function drawTimeline() {
     .attr("height", height + margin.top + margin.bottom);
 
 
-
   var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -131,14 +113,19 @@ function drawTimeline() {
   for(var i=1; i<=16; i++) chapters.push(i);
   chapters.push("Undefined");
 
-  // Prepara i nodi: aggiungi chapterLabel con controllo su capitolo esistente
   var timelineNodes = nodes.map(function(d){
     return {
       id: d.id,
       label: d.label,
       chapterLabel: (d.chapter && chapters.indexOf(d.chapter) !== -1) ? d.chapter : "Undefined",
-      gender: d.gender
+      gender: d.gender,
+      page: d.page
     };
+  });
+
+  window.nodeMapById = {};
+  timelineNodes.forEach(n => {
+    window.nodeMapById[n.id] = n;
   });
 
   // Scala X: ordinale per capitoli
@@ -161,7 +148,6 @@ function drawTimeline() {
     .scale(yScale)
     .orient("left");
 
-  // Disegna assi
   g.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
