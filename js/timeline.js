@@ -35,17 +35,12 @@ function showLinkTimeline() {
         .style("border-radius", "5px")
         .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.3)");
 
-      let popupText = d.source.label + " " + actionDescription + " " + d.target.label;
-      if (d.chapter !== undefined && d.chapter !== null) {
-        popupText += " (Capitolo: " + d.chapter + ")";
-      }
-      popup.append("p").text(popupText);
+      popup.append("p").text(sourceLabel + " " + actionDescription + " " + targetLabel);
     })
     .on("mouseout", function() {
       d3.select(".popup").remove();
     });
 }
-
 
 /* 
  * Mostra un popup di un nodo quando si passa su di esso col mouse.
