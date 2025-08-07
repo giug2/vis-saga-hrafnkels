@@ -2,7 +2,8 @@
 var node;              
 var link;              
 var width = 900;   
-var height = 600;      
+var height = 600;
+let selectedNodeId = null;      
 
 /* 
  * Funzione che restituisce la descrizione testuale di un tipo di azione.
@@ -55,17 +56,19 @@ function showLinkGraph() {
 function showNodeGraph() {
   d3.selectAll(".node")
     .on("mouseover", function(d) {
+      /*
       // evidenzia solo nodi connessi direttamente al nodo d (compreso d)
-     d3.selectAll(".node")
-      .style("opacity", function(o) {
-        return isConnected(d, o) ? 1 : 0.1;  // evidenzia nodo + adiacenti
-      });
+      d3.selectAll(".node")
+        .style("opacity", function(o) {
+          return isConnected(d, o) ? 1 : 0.1;  // evidenzia nodo + adiacenti
+        });
 
       // evidenzia solo link incidenti al nodo d
       d3.selectAll(".link")
         .style("opacity", function(o) {
           return (o.source.id === d.id || o.target.id === d.id) ? 1 : 0.05;
         });
+      */
 
       // popup
       d3.select(".popup").remove(); // rimuovi popup precedente
@@ -100,11 +103,37 @@ function showNodeGraph() {
     .on("mouseout", function() {
       d3.select(".popup").remove();
 
+      /*
       // ripristina opacità a tutti
       d3.selectAll(".node").style("opacity", 1);
       d3.selectAll(".link").style("opacity", 1);
+      */
+    })
+    .on("dblclick", function(d) {
+      if (selectedNodeId === d.id) {
+        // Deseleziona e ripristina tutto
+        selectedNodeId = null;
+        d3.selectAll(".node").style("opacity", 1);
+        d3.selectAll(".link").style("opacity", 1);
+      } else {
+        // Seleziona e mostra solo nodi adiacenti
+        selectedNodeId = d.id;
+
+        d3.selectAll(".node")
+          .style("opacity", function(o) {
+            return isConnected(d, o) ? 1 : 0.1;
+          });
+
+        d3.selectAll(".link")
+          .style("opacity", function(o) {
+            const sourceId = typeof o.source === "object" ? o.source.id : o.source;
+            const targetId = typeof o.target === "object" ? o.target.id : o.target;
+            return (sourceId === d.id || targetId === d.id) ? 1 : 0.05;
+          });
+      }
     });
 }
+
 
 // Funzione che verifica se due nodi sono direttamente connessi (o sono lo stesso nodo)
 function isConnected(a, b) {
