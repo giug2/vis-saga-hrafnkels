@@ -23,6 +23,8 @@ Il foglio di calcolo "hrafnkel_edges" contiene le interazioni tra i personaggi:
 - chapter: il capitolo in cui l'azione è descritta;
 - page: la pagina in cui l'azione è descritta.
 
+> **Nota:** Nel file `graph.js` è presente una parte di codice commentata che rende possibile l'evidenziazione dei nodi al passaggio del mouse.
+
 ### Demo:
 ![Frontend](demo/frontend.png)  
 [Guarda la demo del progetto con il grafo](demo/grafo.gif)  
